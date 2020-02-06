@@ -1,33 +1,29 @@
-# postgres-plus
+# Trusty-daemon
 
-Fork of official Postgres 9 docker container from https://github.com/docker-library/postgres
+A really simply daemon that executes job at regular intervals, and easily reports that jobs, or the daemon itself, is running reliably.
+Available as a Docker container.
 
-Adds automatic backup process and HTTP status API.
+## Use
 
-## Setup
+This daemon was written to reliably manage backups of various docker containers running live, but it can be used for any purpose where you need to execute commands at intervals, and determine if the commands have been successfully executed.
 
-- create a folder to store dumps etc in, and assign it to postgres user id
+Trusty-daemon is itself available in a docker container, so you can deploy and manage it with minimal fuss.
 
-        mkdir backups
-        chown 999 -R ./backups
+## Config
 
-- if you're setting up a brand new container instance with no existin data folder,
-    - comment out the command line in the docker-compose.yml to disable  backup service.
-    - start 
+In your favorite editor, created a file called settings.yml. Add the following example content
 
-            docker-compose up -d
-    
-    - confirm that container is running and postgres has started
+    version: 1
+    port: 3000
+    jobs:
 
-            docker logs postgres
+        myJob:
+            cronmask: "* * * * * *"
+            command: "ls /"
 
-    - stop container
+        myOtherJob:
+            cronmask: "* * * * * *"
+            command: echo \"whatever\" 
 
-            docker-compose down
-
-    - uncomment command line in docker-compose.yml to re-enable backup service
-
-- start 
-
-        docker-compose up -d
+This creates two jobs which call two different commands every second. Cronmask should be wrapped in double quotes because raw cronmasks can break the YML parser used in this project. Commands can be wrapped too if necessary.
 
