@@ -1,0 +1,19 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/xenial64"
+  config.vm.synced_folder "./..", "/vagrant"
+  config.vm.provider :virtualbox do |v|
+     v.customize ["modifyvm", :id, "--memory", 1048]
+     v.name = "postgres-plus"
+  end
+
+  config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+
+  config.vm.provision :shell, path: "provision.sh"
+  config.vm.network "forwarded_port", guest: 3000, host: 3104 
+  config.vm.network "forwarded_port", guest: 3001, host: 3105 
+
+end

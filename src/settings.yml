@@ -1,0 +1,8 @@
+# example settings file
+version: 1
+port: 3000
+jobs:
+    myjob:
+        # cronmask must be wrapped in quotes, as the slashes can break YML
+        cronmask: "* * * * * *"
+        command: "ls /"

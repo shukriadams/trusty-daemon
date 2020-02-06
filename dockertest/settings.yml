@@ -1,0 +1,16 @@
+# example settings file
+version: 1
+port: 3000
+pgdumpTestMode: false
+jobs:
+    # job name must match database name
+    mytest:
+        # cronmask must be wrapped in quotes, as the slashes can break YML
+        # "0 11 * * *" = every day at 11 am
+        cronmask: "0 11 * * *"
+        preserve: 10
+        # optional s3 bucket target
+        s3:
+            bucket: my-bucket
+            key: somekey
+            secret: somesecret
