@@ -1,5 +1,5 @@
 let CronJob = require('cron').CronJob,
-    Logger = require('winston-wrapper'),
+    Logger = require('./logger'),
     exec = require('madscience-node-exec'),
     path = require('path'),
     timebelt = require('timebelt'),
@@ -15,8 +15,8 @@ class CronProcess
 
         this.database = database;
         this.job = job;
-        this.logInfo = Logger.instance().info.info;
-        this.logError = Logger.instance().error.error;
+        this.logInfo = Logger.instance(job.name).info.info;
+        this.logError = Logger.instance(job.name).error.error;
         this.busy = false;
         
     }
@@ -28,12 +28,12 @@ class CronProcess
         const settings = await settingsProvider.get();
         const operationLogFolder = path.join(settings.operationLog, this.job.__safeName);
 
-        fs.ensureDirSync(operationLogFolder);
+        await fs.ensureDir(path.join(operationLogFolder, 'unchecked'));
 
         this.cronJob = new CronJob(this.job.cronmask, async ()=>{
         
             let jobPassed = false;
-            
+            let logException = null;
             try
             {
                 let now = new Date(),
@@ -56,6 +56,7 @@ class CronProcess
                 jobPassed = true;
                 
             } catch (ex){
+                logException = ex;
                 this.logError(ex);
             } finally {
                 this.busy = false;
@@ -71,11 +72,12 @@ class CronProcess
             });
             
             // write fail flag, we don't care about specific successes, last-success is good enough
-            if (!jobPassed)
-                await fs.ensureDir(path.join(operationLogFolder, 'unchecked'));
+            if (!jobPassed){
                 jsonfile.writeFileSync(path.join(operationLogFolder, 'unchecked', `${now.getTime()}.json`), {
-                    date : now
+                    date : now,
+                    error : logException
                 });
+            }
 
         }, 
         null, 

@@ -1,13 +1,15 @@
 (async function(){
 
     const http = require('http'),
-        settingsProvider = require('./lib/settings'),
-        Logger = require('winston-wrapper'),
+        Logger = require('./lib/logger'),
         daemon = require('./lib/daemon'),
         fs = require('fs-extra'),
+        ago = require('s-ago').default,
+        fsUtils = require('madscience-fsUtils'),
         jsonfile = require('jsonfile'),
         path = require('path'),
         process = require('process'),
+        settingsProvider = require('./lib/settings'),
         settings = await settingsProvider.get();
 
     if (!await fs.exists('./settings.yml')){
@@ -16,8 +18,9 @@
     }
 
     fs.ensureDirSync(settings.logPath);
-    Logger.initialize(settings.logPath);
-    const logError = Logger.instance().error.error;
+
+    const logError = (await Logger.initializeGlobal()).error.error;
+    await Logger.initializeJobs();
 
     await daemon.start();
 
@@ -233,13 +236,13 @@
          * Gets status.json for a specific job. This reveals the job's status, when it was
          * last run, and when it will next run.
          */
-        if (route.indexOf('/jobs/') !== -1){
+        if (route.startsWith('/jobs/')){
             try {
                 let jobName = route.match(/\/jobs\/(.*)/).pop();
                 let job = settings.jobs[jobName];
                 if (!job) {
                     res.statusCode = 404;
-                    return res.end(`status.json not found for job ${jobName}. check logs\n`);
+                    return res.end(`job ${jobName} not found.\n`);
                 }
                 
                 let statusPath = path.join(settings.operationLog, job.__safeName, 'status.json');
@@ -259,9 +262,57 @@
                 res.statusCode = 500;
                 res.end('An unexpected error occurred. Please check server logs.\n');
             }
-
         }
 
+
+        /**
+         * Resets all errors for a given job. 
+         */
+        if (route.startsWith('/reset/')){
+            try {
+                let jobName = route.match(/\/reset\/(.*)/).pop();
+                let job = settings.jobs[jobName];
+                if (!job) {
+                    res.statusCode = 404;
+                    return res.end(`job ${jobName} not found\n`);
+                }
+                
+                let uncheckedFolder = path.join(settings.operationLog, job.__safeName, 'unchecked');
+                let checkedFolder = path.join(settings.operationLog, job.__safeName, 'checked');
+                await fs.ensureDir(checkedFolder);
+
+                // force job check against settings object to prevent route injection attack
+                if (!await fs.exists(uncheckedFolder)){
+                    res.statusCode = 400.03;
+                    return res.end(`unchecked folder for job ${jobName} not found\n`);
+                }
+                
+                let lastError = new Date('1980/1/1');
+                let now = new Date();
+                let files = fsUtils.readFilesInDirSync(uncheckedFolder);
+                for (let file of files){
+                    let filename = fsUtils.fileNameWithoutExtension(file);
+                    let filedate = new Date(parseInt(filename));
+
+                    if (filedate.getTime() > now.getTime())
+                        continue;
+                    
+                    if (filedate.getTime() > lastError.getTime())
+                        lastError = filedate;
+                    
+                    const targetPath = path.join(checkedFolder, `${filename}.json`);
+                    await fs.move(file, targetPath);
+                }
+
+                res.writeHead(200, {'Content-Type': 'text/json'});
+                return res.end(`${files.length} error(s) reset for job ${jobName} reset. The last error was from ${lastError} (${ago(lastError)}).\n`);
+            } catch (ex){
+                logError(ex);
+                console.log(ex);
+                res.statusCode = 500;
+                res.end('An unexpected error occurred. Please check server logs.\n');
+            }
+        }
 
         /**
          * Default route, fallthrought

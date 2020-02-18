@@ -7,12 +7,15 @@
     "license": "MIT",
     "dependencies": {
         "cron": "1.7.1",
+        "s-ago": "2.0.1",
         "js-yaml": "3.13.1",
         "fs-extra": "8.1.0",
         "jsonfile": "5.0.0",
+        "winston": "2.4.0",
+        "winston-daily-rotate-file": "1.7.2",
         "sanitize-filename": "1.6.3",
         "madscience-node-exec": "https://github.com/shukriadams/node-exec.git#0.0.2",
-        "winston-wrapper": "https://github.com/shukriadams/winston-wrapper.git#0.0.1",
+        "madscience-fsUtils": "https://github.com/shukriadams/node-fsUtils.git#0.0.4",
         "timebelt": "https://github.com/shukriadams/timebelt.git#0.1.3"
     }
 }
