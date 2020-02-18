@@ -3,6 +3,8 @@ src/backups
 dockertest/backups
 docker/.clone
 src/node_modules
+src/operationLogs
+src/logs
 vagrant/.vagrant
 vagrant/ubuntu-xenial-16.04-cloudimg-console.log
 

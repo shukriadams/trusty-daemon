@@ -4,6 +4,7 @@ let CronJob = require('cron').CronJob,
     path = require('path'),
     timebelt = require('timebelt'),
     jsonfile = require('jsonfile'),
+    
     fs = require('fs-extra'),
     settingsProvider = require('./settings'),
     _jobs = [];
@@ -24,12 +25,10 @@ class CronProcess
         
         this.logInfo(`Starting job ${this.database}`);
         
-        const folder = path.join('./backups/dumps', this.database);
         const settings = await settingsProvider.get();
-        const historyLogFolder = path.join('./backups/flags', this.database);
+        const operationLogFolder = path.join(settings.operationLog, this.job.__safeName);
 
-        fs.ensureDirSync(folder);
-        fs.ensureDirSync(historyLogFolder);
+        fs.ensureDirSync(operationLogFolder);
 
         this.cronJob = new CronJob(this.job.cronmask, async ()=>{
         
@@ -40,45 +39,16 @@ class CronProcess
                 let now = new Date(),
                     filenameTimestamp = `${timebelt.toShortDate(now, 'y-m-d')}__${timebelt.toShortTime(now, 'h-m-s')}`;
 
-                // convert args object into array, property name prepended with single dash for single char names
-                // and double dash for longer
-                let pgArgs = [];
-                for (let arg in this.job.args){
-                    pgArgs.push(arg.length === 1 ? `-${arg}` : `--${arg}`);
-                    pgArgs.push(this.job.args[arg]);
-                }
-
-                pgArgs.push('-f');
-                pgArgs.push(`${folder}/${this.database}_${filenameTimestamp}.dmp`);
-                pgArgs.push(this.database);
-
-                if (settings.pgdumpTestMode){
-                    // in test mode, write a shim dump file with a string in it.
-                    fs.outputFile(`${folder}/${this.database}_${filenameTimestamp}.dmp`, 'test dump content');
-                } else {
+                if (this.job.enabled){
                     let result = await exec({ 
                         cmd : `sh`,
                         args : ['-c',`${this.job.command}`]
                     });
-                    this.logInfo(result);
+    
+                    if (this.job.logResults)
+                        this.logInfo(result);
+   
                 }
-
-                // cleanup old
-                var files = await fs.readdir(folder);
-                if (files.length > this.job.preserve){
-                    files.sort(function(a, b) {
-                        return fs.statSync(path.join(folder, a)).mtime.getTime() - 
-                            fs.statSync(path.join(folder, b)).mtime.getTime();
-                    });
-
-                    for (let i = 0 ; i < files.length - this.job.preserve ; i ++ ){
-                        let file = path.join(folder, files[i]);
-                        await fs.remove(file);
-                        this.logInfo(`Cleaned out dump ${file}.`);
-                    }
-                }
-
-                // push to s3
 
                 // log
                 this.logInfo(`Completed job ${this.database}`);
@@ -94,15 +64,16 @@ class CronProcess
             const now = new Date();
 
             // write static status flag
-            jsonfile.writeFileSync(path.join(historyLogFolder, `status.json`), {
+            jsonfile.writeFileSync(path.join(operationLogFolder, `status.json`), {
                 passed : jobPassed,
                 next : new Date(this.cronJob.nextDates().toString()),
                 date : now
             });
             
-            // write per-fail flag
+            // write fail flag, we don't care about specific successes, last-success is good enough
             if (!jobPassed)
-                jsonfile.writeFileSync(path.join(historyLogFolder, `fail-${now.getTime()}.json`), {
+                await fs.ensureDir(path.join(operationLogFolder, 'unchecked'));
+                jsonfile.writeFileSync(path.join(operationLogFolder, 'unchecked', `${now.getTime()}.json`), {
                     date : now
                 });
 

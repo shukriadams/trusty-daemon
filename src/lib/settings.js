@@ -1,5 +1,6 @@
 let fs = require('fs-extra'),
     yaml = require('js-yaml'),
+    sanitize = require('sanitize-filename'),
     _settings = null;
 
 module.exports = {
@@ -12,35 +13,32 @@ module.exports = {
                 let settingsYML = await fs.readFile('./settings.yml', 'utf8');
                 rawSettings = yaml.safeLoad(settingsYML);
             } catch (e) {
-                console.log('settings.yml contains invalid markup');
+                console.log('Error reading settings.yml');
                 console.log(e);
             }
             
             // force default structures
             rawSettings = Object.assign({
                 version : 1,
-                pgdumpTestMode : false,
+                logPath : './logs',
+                operationLog : './operationLogs',
                 jobs : {}
             }, rawSettings);
     
-            for (let jobName in rawSettings.jobs){
+            for (const jobName in rawSettings.jobs){
+
                 let job = rawSettings.jobs[jobName];
+
                 rawSettings.jobs[jobName] = Object.assign({
                     
-                    // standard cron mask for job to run at
-                    cronmask : '*/10 * * * * *',
+                    __name : jobName,
 
-                    // if set to true, job will be ignored. convenient way to keep job in settings file without having to run it
+                    __safeName : sanitize(jobName),
+
+                    // enabled field is optional, is always one by default
                     enabled : true,
-
-                    // max number of previous backups above which files will be auto-deleted
-                    preserve : 10,  
-
-                    // object of arguments to pass to pg_dump
-                    args : {},
-
-                    archive : null
-
+                    // if true, all console out will be written to log. This can bloat your logs, so use carefully
+                    logResults : false
                 }, job);
             }
 
