@@ -35,6 +35,8 @@ Trusty-daemon uses a dead man's switch mechanism to ensure that it's running. Wh
 
 In addition to this, Trusty-daemon is written to be slaved to simpler but more trusted uptime monitors, such as [Uptimerobot.com](https://uptimerobot.com). Trusty-daemon can return a simple fail flag if any job is currently failing, or a simple fail flag if any job has failed since your last checked in.
 
+Trusty-daemon does not expose error logs, to get details on why a job has failed you'll need to peruse logs the old fashioned way.
+
 ## How to use it
 
 Trusty-daemon has no security or permission system of its own. It _will_ expose the names of your jobs and their failing state to whoever knows where to ask. If you want to use trusty-daemon as a remote monitoring system, it is recommended you chain two instances of trusty-daemon together,and use one to expose the overall failing state of the other. 

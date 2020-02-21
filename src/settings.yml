@@ -5,3 +5,4 @@ jobs:
     myjob:
         cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
         command: "ls /"
+        logResults: true

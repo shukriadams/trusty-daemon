@@ -1,5 +1,16 @@
 version: "2"
 services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10.4.12
+    volumes:
+    - /home/vagrant/mariadb:/var/lib/mysql:rw
+    - /home/vagrant/mariadb-backups:/var/lib/mysql-backups:rw
+    ports:
+    - "9082:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: Root
+    restart: unless-stopped
   trustydaemon:
     image: shukriadams/trusty-daemon:latest
     container_name: trustydaemon
@@ -10,5 +21,6 @@ services:
       - ./settings.yml:/var/app/settings.yml
       - ./operationLogs:/var/app/operationLogs:rw
       - ./logs:/var/app/logs:rw
-    command: sh -c "cd /var/app && node index"
+      # this exposes all docker containers to trusty-daemon
+      - "/var/run/docker.sock:/var/run/docker.sock"
       

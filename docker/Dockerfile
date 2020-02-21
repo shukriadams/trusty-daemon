@@ -6,8 +6,10 @@ RUN apk update \
     && apk add bash \
     && apk add nodejs=10.14.2-r0 \
     && apk add npm=10.14.2-r0 \
+    && apk add docker \
     && mkdir -p /var/app \
     && adduser -D -u 1000 app \
+    && addgroup app docker \
     && chmod 700 -R /var/app \
     && chown -R app /var/app
 
