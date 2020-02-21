@@ -16,7 +16,7 @@ fi
 
 # clone working copy of repo at the latest tag
 rm -rf .clone &&
-git clone --depth 1 --branch $TAG https://github.com/shukriadams/postgres-plus.git .clone &&
+git clone --depth 1 --branch $TAG https://github.com/shukriadams/trusty-daemon.git .clone &&
 
 
 # kill any existing build container
@@ -51,9 +51,9 @@ docker exec buildcontainer sh -c 'cd /tmp/stage/ && npm install --production --n
 docker exec buildcontainer sh -c 'tar -czvf /tmp/build.tar.gz /tmp/stage' &&
 docker cp buildcontainer:/tmp/build.tar.gz . &&
 
-docker build -t shukriadams/postgres-plus . &&
-docker tag shukriadams/postgres-plus:latest shukriadams/postgres-plus:$TAG &&
+docker build -t shukriadams/trust-daemon . &&
+docker tag shukriadams/trust-daemon:latest shukriadams/trust-daemon:$TAG &&
 
-docker push shukriadams/postgres-plus:$TAG &&
+docker push shukriadams/trust-daemon:$TAG &&
 
 echo "Build done";
