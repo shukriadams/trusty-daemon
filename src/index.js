@@ -36,7 +36,6 @@
         if (route === '/jobs'){
 
             try {
-                throw 'lol';
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${JSON.stringify(Object.keys(settings.jobs), null, 4)}\n`);
             } catch(ex){

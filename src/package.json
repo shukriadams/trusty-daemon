@@ -5,6 +5,9 @@
     "private": false,
     "author": "shukri.adams@gmail.com",
     "license": "MIT",
+    "scripts": {
+        "start": "node index"
+    },    
     "dependencies": {
         "cron": "1.7.1",
         "s-ago": "2.0.1",

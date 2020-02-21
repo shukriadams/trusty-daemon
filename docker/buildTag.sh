@@ -51,9 +51,9 @@ docker exec buildcontainer sh -c 'cd /tmp/stage/ && npm install --production --n
 docker exec buildcontainer sh -c 'tar -czvf /tmp/build.tar.gz /tmp/stage' &&
 docker cp buildcontainer:/tmp/build.tar.gz . &&
 
-docker build -t shukriadams/trust-daemon . &&
-docker tag shukriadams/trust-daemon:latest shukriadams/trust-daemon:$TAG &&
+docker build -t shukriadams/trusty-daemon . &&
+docker tag shukriadams/trusty-daemon:latest shukriadams/trusty-daemon:$TAG &&
 
-docker push shukriadams/trust-daemon:$TAG &&
+# docker push shukriadams/trusty-daemon:$TAG &&
 
 echo "Build done";
