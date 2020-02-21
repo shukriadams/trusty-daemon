@@ -4,5 +4,6 @@ port: 3000
 jobs:
     myjob:
         cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
-        command: "docker exec -it mariadb sh -c \" ls / \" "
+        # command: "docker exec mariadb sh -c \"  mysqldump --all-databases --single-transaction --quick --lock-tables=false > /var/lib/mysql-backups/full-backup-$(date +%F).sql -u root --password=Root \""
+        command: "docker exec mariadb sh -c \"mysqldump --all-databases --single-transaction --quick --lock-tables=false > /var/lib/mysql-backups/full-backup-$(date +%F).sql -u root --password=Root\""
         logResults: true
