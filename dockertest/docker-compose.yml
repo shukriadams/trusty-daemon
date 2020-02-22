@@ -14,6 +14,8 @@ services:
   trustydaemon:
     image: shukriadams/trusty-daemon:latest
     container_name: trustydaemon
+    # duplicity needs hostname to be constant
+    hostname : trustydaemon 
     restart: unless-stopped
     ports:
     - "3100:3000"

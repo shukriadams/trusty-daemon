@@ -1,11 +1,18 @@
-# example settings file
+# This is an example of a job that backs a dockerized mariadb instance up to S3.
 version: 1
 port: 3000
+
+# install duplicity (and one if its requirements) when the container starts. This isn't ideal, but saves you 
+# rolling your own container image with these package baked in
 onstart:  apt-get install duplicity -y &&
           apt-get install python-boto -y
 jobs:
     myjob:
         cronmask: "*/10 * * * * *" 
+
+        # The first part of this command script backups up all databases in a mariadb instance, in the "mariadb" container.
+        # The second part uses duplicity to upload the mariadb backups to an s3 bucket. The backups are read from the 
+        # /var/lib/mysql-backups folder which is also in the "mariadb" container, and which is shared via a volume mount.
         command: "docker exec mariadb sh -c  \
                       \"mysqldump --all-databases --single-transaction --quick --lock-tables=false > \
                       /var/lib/mysql-backups/full-backup-$(date +%F).sql -u root --password=Root\" \

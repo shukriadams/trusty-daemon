@@ -1,0 +1,36 @@
+version: "2"
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10.4.12
+    volumes:
+    # mariadb database persists here
+    - /home/MYUSER/mariadb:/var/lib/mysql:rw
+    # mariadb backups are persist to this folder. This isn't strictly necessary, as the backup files will immediately be pushed
+    # to S3, but it's always better to write these outside the container
+    - /home/MYUSER/mariadb-backups:/var/lib/mysql-backups:rw
+    ports:
+    - "9082:3306"
+    environment:
+      # we'll need this password to run backup job
+      MYSQL_ROOT_PASSWORD: Root
+    restart: unless-stopped
+  trustydaemon:
+    # get an actual tag from docker-hub
+    image: shukriadams/trusty-daemon:1.0.0
+    container_name: trustydaemon
+    # duplicity needs hostname to be constant, so we need to set it here
+    hostname : trustydaemon 
+    restart: unless-stopped
+    ports:
+    # expose trusty-daemon's http api through this
+    - "3100:3000"
+    volumes:
+      - ./settings.yml:/var/app/settings.yml
+      - ./jobs:/var/app/jobs:rw
+      - ./logs:/var/app/logs:rw
+      # this lets trusty-daemon see mariadb's backup folder - duplicity will sync this to s3
+      - /home/vagrant/mariadb-backups:/var/lib/mysql-backups
+      # this exposes all docker containers to trusty-daemon
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      
