@@ -5,6 +5,7 @@
         daemon = require('./lib/daemon'),
         fs = require('fs-extra'),
         ago = require('s-ago').default,
+        exec = require('madscience-node-exec'),
         fsUtils = require('madscience-fsUtils'),
         jsonfile = require('jsonfile'),
         path = require('path'),
@@ -18,9 +19,27 @@
     }
 
     fs.ensureDirSync(settings.logPath);
+    const logError = (await Logger.initializeGlobal()).error.error,
+        logInfo = (await Logger.initializeGlobal()).info.info;
 
-    const logError = (await Logger.initializeGlobal()).error.error;
     await Logger.initializeJobs();
+
+
+    if (settings.onstart){
+        console.log('onstart command executing');
+
+        try {
+            const result = await exec({ 
+                cmd : `sh`,
+                args : ['-c',`${settings.onstart}`]
+            });
+            console.log(`onstart finished with result`, result);
+        } catch(ex){
+            console.log(`onstart failed with`, ex);
+            process.exit(1);
+        }
+    }
+
 
     await daemon.start();
 
@@ -310,6 +329,46 @@
                 console.log(ex);
                 res.statusCode = 500;
                 res.end('An unexpected error occurred. Please check server logs.\n');
+            }
+        }
+
+
+        /**
+         * Runs a specific job in debug mode
+         */
+        if (route.startsWith('/debug/')){
+            let command = null;
+            try {
+
+                let newSettings = await settingsProvider.get(true);
+                let jobName = route.match(/\/debug\/(.*)/).pop();
+                let job = settings.jobs[jobName];
+                
+                if (!job || !newSettings.jobs[jobName]) {
+                    res.statusCode = 404;
+                    return res.end(`job ${jobName} not found\n`);
+                }
+                
+                if (job.enabled){
+                    res.statusCode = 400;
+                    return res.end(`job ${jobName} cannot be debugged if its enabled - set its \"enabled\" flag to false, and restart trusty-daemon.\n`);
+                }
+
+                command = newSettings.jobs[jobName].command;
+
+                let result = await exec({ 
+                    cmd : `sh`,
+                    verbose : true,
+                    args : ['-c',`${command}`]
+                });
+
+                if (result.code !== 0)
+                    return res.end(`Debug failed with errors. Command ${command}, ${JSON.stringify(result)} `);
+
+                return res.end(`Debug passed without errors : ${JSON.stringify(result.result)}\n`, );
+            } catch (ex){
+                res.statusCode = 500;
+                return res.end(`Debug failed with errors. Command ${command}, ${JSON.stringify(ex)} `);
             }
         }
 

@@ -4,9 +4,9 @@ let fs = require('fs-extra'),
     _settings = null;
 
 module.exports = {
-    get : async function(){
+    get : async function(forceRead){
 
-        if (!_settings){
+        if (!_settings || forceRead === true){
             let rawSettings = null;
 
             try {
@@ -21,7 +21,8 @@ module.exports = {
             rawSettings = Object.assign({
                 version : 1,
                 logPath : './logs',
-                operationLog : './operationLogs',
+                operationLog : './jobs',
+                onstart : null,
                 jobs : {}
             }, rawSettings);
     
@@ -37,8 +38,13 @@ module.exports = {
 
                     // enabled field is optional, is always one by default
                     enabled : true,
+
+                    // shell command to run
+                    command : '',
+
                     // if true, all console out will be written to log. This can bloat your logs, so use carefully
                     logResults : false
+
                 }, job);
             }
 

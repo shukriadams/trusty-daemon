@@ -10,13 +10,14 @@ This daemon was written to reliably manage backups of various docker containers,
 
 ## Config
 
-In your favorite editor, create a file called settings.yml. Add some jobs - here are two
+In your favorite editor, create a file called settings.yml. Add some jobs, for example 
 
     version: 1
     port: 3000
     jobs:
         foo:
             cronmask: "* * * * * *"
+            logResults: true
             command: "ls /"
 
         bar:
@@ -25,9 +26,19 @@ In your favorite editor, create a file called settings.yml. Add some jobs - here
 
 This creates two jobs which call two different commands every second. Cronmasks should be wrapped in double quotes because raw cronmasks can break YML parsing. Commands can be wrapped too if necessary.
 
+Longer commands can be split over multiple lines
+    version: 1
+    port: 3000
+    jobs:
+        myjob:
+            cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
+            logResults: true
+            command: "echo "first " \
+                      && echo \"second\"
+
 ## Logs
 
-Trusty-daemon writes two kinds of logs. Normal text logs (console out of commands or errors), and then JSON data logs, which are used to report when specific things ran and if they passed or failed.
+Trusty-daemon logs to two locations. Its own logs are written to ./logs in the deploy folder, while job logs are written to ./jobs/[jobname]/logs.
 
 ## How it works
 
@@ -42,3 +53,11 @@ Trusty-daemon does not expose error logs, to get details on why a job has failed
 Trusty-daemon has no security or permission system of its own. It _will_ expose the names of your jobs and their failing state to whoever knows where to ask. If you want to use trusty-daemon as a remote monitoring system, it is recommended you chain two instances of trusty-daemon together,and use one to expose the overall failing state of the other. 
 
 If you want reliable push alerts, you can chain a service like uptimerobot.com to a public trusty-daemon, and in that in turn to a private trusty-daemon instance.
+
+### Debugging commands
+
+Trusy-daemon runs shell commands - normally, these would be written and tested in advance in your preferred shell. However, if you want to write and debug a command from trusty-daemon, you can do so by setting the jobs's "enabled" property to false, and calling
+
+    /debug/[your-job-name]
+
+This runs the job immediately, reads the command directly from settings.yml, and consoles out all output. Debugged jobs will not be written to logs.

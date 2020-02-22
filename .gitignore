@@ -3,7 +3,7 @@ src/backups
 dockertest/backups
 docker/.clone
 src/node_modules
-src/operationLogs
+src/jobs
 src/logs
 vagrant/.vagrant
 vagrant/ubuntu-xenial-16.04-cloudimg-console.log
@@ -12,4 +12,6 @@ docker/build.tar.gz
 dockertest/.docker-compose.swp
 dockertest/.docker-compose-mariadb.yml.swp
 dockertest/logs
-dockertest/operationLogs
+dockertest/jobs
+dockertest/settings.yml
+dockertest/settings.yml

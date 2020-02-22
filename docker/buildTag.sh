@@ -14,6 +14,18 @@ if [ -z $TAG ]; then
    exit 1;
 fi
 
+# assign switches
+TARGET="ubuntu"
+while [ -n "$1" ]; do 
+    case "$1" in
+    -t)
+        TARGET="$2" shift;;
+    esac 
+    shift
+done
+
+TARGET_DOCKERFILE="Dockerfile-${TARGET}"
+
 # clone working copy of repo at the latest tag
 rm -rf .clone &&
 git clone --depth 1 --branch $TAG https://github.com/shukriadams/trusty-daemon.git .clone &&
@@ -51,7 +63,8 @@ docker exec buildcontainer sh -c 'cd /tmp/stage/ && npm install --production --n
 docker exec buildcontainer sh -c 'tar -czvf /tmp/build.tar.gz /tmp/stage' &&
 docker cp buildcontainer:/tmp/build.tar.gz . &&
 
-docker build -t shukriadams/trusty-daemon . &&
+# build trusty-daemon container
+docker build -t shukriadams/trusty-daemon -f $TARGET_DOCKERFILE . &&
 docker tag shukriadams/trusty-daemon:latest shukriadams/trusty-daemon:$TAG &&
 
 # docker push shukriadams/trusty-daemon:$TAG &&

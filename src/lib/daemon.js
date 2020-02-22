@@ -2,28 +2,24 @@ let CronJob = require('cron').CronJob,
     Logger = require('./logger'),
     exec = require('madscience-node-exec'),
     path = require('path'),
-    timebelt = require('timebelt'),
     jsonfile = require('jsonfile'),
-    
     fs = require('fs-extra'),
     settingsProvider = require('./settings'),
     _jobs = [];
 
 class CronProcess
 {
-    constructor(database, job){
-
-        this.database = database;
+    constructor(name, job){
+        this.name = name;
         this.job = job;
         this.logInfo = Logger.instance(job.name).info.info;
         this.logError = Logger.instance(job.name).error.error;
         this.busy = false;
-        
     }
 
     async start(){
         
-        this.logInfo(`Starting job ${this.database}`);
+        this.logInfo(`Starting job ${this.name}`);
         
         const settings = await settingsProvider.get();
         const operationLogFolder = path.join(settings.operationLog, this.job.__safeName);
@@ -31,27 +27,22 @@ class CronProcess
         await fs.ensureDir(path.join(operationLogFolder, 'unchecked'));
 
         this.cronJob = new CronJob(this.job.cronmask, async ()=>{
-        
-            let jobPassed = false;
-            let logException = null;
+
+            let jobPassed = false,
+                logException = null;
+
             try
             {
-                let now = new Date(),
-                    filenameTimestamp = `${timebelt.toShortDate(now, 'y-m-d')}__${timebelt.toShortTime(now, 'h-m-s')}`;
+                let result = await exec({ 
+                    cmd : `sh`,
+                    args : ['-c',`${this.job.command}`]
+                });
 
-                if (this.job.enabled){
-                    let result = await exec({ 
-                        cmd : `sh`,
-                        args : ['-c',`${this.job.command}`]
-                    });
-    
-                    if (this.job.logResults)
-                        this.logInfo(result);
-   
-                }
+                if (this.job.logResults)
+                    this.logInfo(result);
 
                 // log
-                this.logInfo(`Completed job ${this.database}`);
+                this.logInfo(`Completed job ${this.name}`);
                 
                 jobPassed = true;
                 
@@ -85,8 +76,7 @@ class CronProcess
         null, 
         null, 
         true /* runonitit */ );
-
-        
+       
     }
 }
 
@@ -98,16 +88,19 @@ module.exports = {
 
         const settings = await settingsProvider.get();
 
-        for (const database in settings.jobs){
-            const job = settings.jobs[database];
+        for (const name in settings.jobs){
+            const job = settings.jobs[name];
 
-            if (!job.enabled)
+            if (!job.enabled){
+                console.log(`Job ${name} is disabled, skipping.`);
                 continue;
+            }
 
-            const process = new CronProcess(database, job);
+            const process = new CronProcess(name, job);
 
             _jobs.push(process);
             await process.start();
+            console.log(`Started for job ${name}.`);
         }
     }
 }

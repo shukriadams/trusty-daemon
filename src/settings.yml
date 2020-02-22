@@ -1,8 +1,15 @@
 # example settings file
 version: 1
 port: 3000
+
+# optional command to run when trusty-daemon starts. If your jobs need extra apps installed on the OS and you
+# don't want to roll your own container image, this is a good place to install this apps. For egs, if you're
+# running the trusty-daemon-ubunty, you can use "apt-get install someapp -y" here
+onstart: echo "app has started"
+
 jobs:
     myjob:
         cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
-        command: "ls /"
+        command: echo "lol!"
         logResults: true
+        enabled: false
