@@ -19,57 +19,64 @@ class CronProcess
 
     async start(){
         
-        this.logInfo(`Starting job ${this.name}`);
+        console.log(`Starting job ${this.name}`);
         
         const settings = await settingsProvider.get();
         const operationLogFolder = path.join(settings.operationLog, this.job.__safeName);
 
         await fs.ensureDir(path.join(operationLogFolder, 'unchecked'));
-
+        
         this.cronJob = new CronJob(this.job.cronmask, async ()=>{
 
-            let jobPassed = false,
-                logException = null;
+            if (this.busy)
+                return;
 
-            try
-            {
-                let result = await exec({ 
-                    cmd : `sh`,
-                    args : ['-c',`${this.job.command}`]
+            try {
+                this.busy = true;
+
+                let jobPassed = false,
+                    logException = null;
+
+                try
+                {
+                    let result = await exec({ 
+                        cmd : `sh`,
+                        args : ['-c',`${this.job.command}`]
+                    });
+
+                    if (this.job.logResults)
+                        this.logInfo(result);
+
+                    // log
+                    this.logInfo(`Completed job ${this.name}`);
+
+                    jobPassed = true;
+
+                } catch (ex){
+                    logException = ex;
+                    this.logError(ex);
+                } 
+
+                const now = new Date();
+
+                // write static status flag
+                jsonfile.writeFileSync(path.join(operationLogFolder, `status.json`), {
+                    passed : jobPassed,
+                    next : new Date(this.cronJob.nextDates().toString()),
+                    date : now
                 });
-
-                if (this.job.logResults)
-                    this.logInfo(result);
-
-                // log
-                this.logInfo(`Completed job ${this.name}`);
                 
-                jobPassed = true;
-                
-            } catch (ex){
-                logException = ex;
-                this.logError(ex);
+                // write fail flag, we don't care about specific successes, last-success is good enough
+                if (!jobPassed){
+                    jsonfile.writeFileSync(path.join(operationLogFolder, 'unchecked', `${now.getTime()}.json`), {
+                        date : now,
+                        error : logException
+                    });
+                }
+
             } finally {
                 this.busy = false;
             }
-            
-            const now = new Date();
-
-            // write static status flag
-            jsonfile.writeFileSync(path.join(operationLogFolder, `status.json`), {
-                passed : jobPassed,
-                next : new Date(this.cronJob.nextDates().toString()),
-                date : now
-            });
-            
-            // write fail flag, we don't care about specific successes, last-success is good enough
-            if (!jobPassed){
-                jsonfile.writeFileSync(path.join(operationLogFolder, 'unchecked', `${now.getTime()}.json`), {
-                    date : now,
-                    error : logException
-                });
-            }
-
         }, 
         null, 
         true, 
@@ -92,7 +99,7 @@ module.exports = {
             const job = settings.jobs[name];
 
             if (!job.enabled){
-                console.log(`Job ${name} is disabled, skipping.`);
+                console.log(`Job ${name} is disabled, skipping`);
                 continue;
             }
 
@@ -100,7 +107,6 @@ module.exports = {
 
             _jobs.push(process);
             await process.start();
-            console.log(`Started for job ${name}.`);
         }
     }
 }

@@ -19,8 +19,9 @@ services:
     - "3100:3000"
     volumes:
       - ./settings.yml:/var/app/settings.yml
-      - ./operationLogs:/var/app/operationLogs:rw
+      - ./jobs:/var/app/jobs:rw
       - ./logs:/var/app/logs:rw
+      - /home/vagrant/mariadb-backups:/var/lib/mysql-backups
       # this exposes all docker containers to trusty-daemon
       - "/var/run/docker.sock:/var/run/docker.sock"
       

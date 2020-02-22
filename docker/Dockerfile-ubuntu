@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 RUN apt-get update \
     && apt-get install nodejs -y \
     && apt-get install npm -y \
-    && apt-get install docker -y \
+    && apt-get install docker.io -y \
     && mkdir -p /var/app 
 
 # copy the build zip in, unpack, strips the first two folders when unzipping, getting rid of /tmp/build

@@ -10,6 +10,6 @@ onstart: echo "app has started"
 jobs:
     myjob:
         cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
-        command: echo "lol!"
+        command: echo "this works"
         logResults: true
-        enabled: false
+        enabled: true
