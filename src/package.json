@@ -8,6 +8,7 @@
     "scripts": {
         "start": "node index"
     },
+    "devDependencies": {},
     "dependencies": {
         "cron": "1.7.1",
         "s-ago": "2.0.1",

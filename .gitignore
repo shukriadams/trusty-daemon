@@ -1,17 +1,18 @@
 
 src/backups
 dockertest/backups
-docker/.clone
+build/docker/.clone
+build/docker/build.tar.gz
 src/node_modules
 src/jobs
 src/logs
 vagrant/.vagrant
 vagrant/ubuntu-xenial-16.04-cloudimg-console.log
-
-docker/build.tar.gz
 dockertest/.docker-compose.swp
 dockertest/.docker-compose-mariadb.yml.swp
 dockertest/logs
 dockertest/jobs
 dockertest/settings.yml
 dockertest/settings.yml
+build/travis/build.tar.gz
+build/travis/Dockerfile-ubuntu
