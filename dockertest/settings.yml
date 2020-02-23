@@ -1,19 +1,35 @@
 # example settings file
 version: 1
 port: 3000
-onstart:  apt-get install duplicity -y &&
-          apt-get install python-boto -y
+onstart: apt-get install duplicity -y &&
+         apt-get install python-boto -y
 jobs:
-    myjob:
+    mariadb:
         cronmask: "*/10 * * * * *" 
         command: "docker exec mariadb sh -c  \
-                      \"mysqldump --all-databases --single-transaction --quick --lock-tables=false > \
-                      /var/lib/mysql-backups/full-backup-$(date +%F).sql -u root --password=Root\" \
+                    \"mysqldump --all-databases --single-transaction --quick --lock-tables=false > \
+                    /var/lib/mysql-backups/full-backup-$(date +%F).sql -u root --password=Root\" \
                   
                   && \
                   
-                  AWS_ACCESS_KEY_ID=mykey \
-                  AWS_SECRET_ACCESS_KEY=mysecret \
+                  AWS_ACCESS_KEY_ID=..... \
+                  AWS_SECRET_ACCESS_KEY=..... \
                   PASSPHRASE=whatever \
-                  duplicity /var/lib/mysql-backups s3://s3.amazonaws.com/mybucket"
+                  duplicity /var/lib/mysql-backups s3://s3.amazonaws.com/mybucket/mariadb"
         logResults: true
+        enabled: false
+    postgres:
+        cronmask: "*/20 * * * * *" 
+        command: "docker exec postgres sh -c \
+                 \"pg_dump -h localhost -U postgres -Fc postgres > /var/lib/postgresdumps/dump.dmp  \" \
+                 
+                 && \
+
+                 AWS_ACCESS_KEY_ID=..... \
+                 AWS_SECRET_ACCESS_KEY=..... \
+                 PASSPHRASE=whatever \
+                 duplicity /var/lib/postgresdumps s3://s3.amazonaws.com/mybucket/postgres"
+
+
+                
+         

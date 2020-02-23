@@ -1,5 +1,6 @@
 version: "2"
 services:
+
   mariadb:
     container_name: mariadb
     image: mariadb:10.4.12
@@ -11,8 +12,22 @@ services:
     environment:
         MYSQL_ROOT_PASSWORD: Root
     restart: unless-stopped
+
+  postgres:
+    image: postgres:12-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: passwurd
+      PGDATA: /var/lib/postgresql/data/mydata # needed to allow postgress to mount to external volume folder
+    ports:
+    - "5432:5432"
+    volumes:
+      - /home/vagrant/postgres-data:/var/lib/postgresql/data/mydata:rw
+      - /home/vagrant/postgres-dump:/var/lib/postgresdumps:rw    
+
   trustydaemon:
-    image: shukriadams/trusty-daemon:latest
+    image: shukriadams/trusty-daemon:0.0.1
     container_name: trustydaemon
     # duplicity needs hostname to be constant
     hostname : trustydaemon 
@@ -23,7 +38,9 @@ services:
       - ./settings.yml:/var/app/settings.yml
       - ./jobs:/var/app/jobs:rw
       - ./logs:/var/app/logs:rw
-      - /home/vagrant/mariadb-backups:/var/lib/mysql-backups
       # this exposes all docker containers to trusty-daemon
       - "/var/run/docker.sock:/var/run/docker.sock"
-      
+      # share mysql backups
+      - /home/vagrant/mariadb-backups:/var/lib/mysql-backups
+      # share postgres backups
+      - /home/vagrant/postgres-dump:/var/lib/postgresdumps
