@@ -22,7 +22,7 @@ module.exports = {
                 version : 1,
                 logPath : './logs',
                 operationLog : './jobs',
-                timeout: 600000, // 10 minutes
+                timeout: 600000, // timeout of http calls. default is 10 minutes. Set to 0 to disable.
                 onstart : null,
                 jobs : {}
             }, rawSettings);

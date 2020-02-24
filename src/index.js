@@ -53,17 +53,17 @@
          * Returns a string array for all jobs
          */
         if (route === '/jobs'){
-
             try {
+
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${JSON.stringify(Object.keys(settings.jobs), null, 4)}\n`);
-            } catch(ex){
+
+            }catch(ex){
                 logError(ex);
                 console.log(ex);
                 res.statusCode = 500;
                 res.end('An unexpected error occurred. Please check server logs.\n');
             }
-
         }
 
 
@@ -125,8 +125,8 @@
          */  
         if (route === '/status/failing'){
             try {
-                let failed = false;
-                const now = new Date();
+                let failed = false,
+                    now = new Date();
 
                 for (const jobName in settings.jobs){
                     let job = settings.jobs[jobName];
@@ -159,7 +159,6 @@
                 }
 
                 return res.end(`All services are passing\n`);
-
 
             } catch(ex){
                 logError(ex);
@@ -202,6 +201,7 @@
     
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${JSON.stringify(failed, null, 4)}\n`);
+
             }catch(ex){
                 logError(ex);
                 console.log(ex);
@@ -241,6 +241,7 @@
 
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${JSON.stringify(failed, null, 4)}\n`);
+
             }catch(ex){
                 logError(ex);
                 console.log(ex);
@@ -274,6 +275,7 @@
                 let status = jsonfile.readFileSync(statusPath);
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${JSON.stringify(status, null, 4)}\n`);
+
             } catch (ex){
                 logError(ex);
                 console.log(ex);
@@ -290,13 +292,15 @@
             try {
                 let jobName = route.match(/\/reset\/(.*)/).pop();
                 let job = settings.jobs[jobName];
+                
                 if (!job) {
                     res.statusCode = 404;
                     return res.end(`job ${jobName} not found\n`);
                 }
                 
-                let uncheckedFolder = path.join(settings.operationLog, job.__safeName, 'unchecked');
-                let checkedFolder = path.join(settings.operationLog, job.__safeName, 'checked');
+                let uncheckedFolder = path.join(settings.operationLog, job.__safeName, 'unchecked'),
+                    checkedFolder = path.join(settings.operationLog, job.__safeName, 'checked');
+
                 await fs.ensureDir(checkedFolder);
 
                 // force job check against settings object to prevent route injection attack
@@ -324,6 +328,7 @@
 
                 res.writeHead(200, {'Content-Type': 'text/json'});
                 return res.end(`${files.length} error(s) reset for job ${jobName} reset. The last error was from ${lastError} (${ago(lastError)}).\n`);
+
             } catch (ex){
                 logError(ex);
                 console.log(ex);
@@ -366,11 +371,13 @@
                     return res.end(`Debug failed with errors. Command ${command}, ${JSON.stringify(result)} `);
 
                 return res.end(`Debug passed without errors : ${JSON.stringify(result.result)}\n`, );
+
             } catch (ex){
                 res.statusCode = 500;
                 return res.end(`Debug failed with errors. Command ${command}, ${JSON.stringify(ex)} `);
             }
         }
+
 
         /**
          * Default route, fallthrought
