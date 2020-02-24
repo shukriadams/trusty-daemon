@@ -387,6 +387,7 @@ Use /jobs/JOBNAME to get details on a specific job.\n`
 
     });
 
+    server.timeout = settings.timeout;
     server.listen(settings.port);
     console.log(`trusty-daemon is now running on port ${settings.port}`);
 

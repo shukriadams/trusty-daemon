@@ -22,6 +22,7 @@ module.exports = {
                 version : 1,
                 logPath : './logs',
                 operationLog : './jobs',
+                timeout: 600000, // 10 minutes
                 onstart : null,
                 jobs : {}
             }, rawSettings);
