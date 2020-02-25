@@ -27,6 +27,7 @@ In your favorite editor, create a file called settings.yml. Add some jobs, for e
 This creates two jobs which call two different commands every second. Cronmasks should be wrapped in double quotes because raw cronmasks can break YML parsing. Commands can be wrapped too if necessary.
 
 Longer commands can be split over multiple lines
+
     version: 1
     port: 3000
     jobs:
@@ -35,6 +36,19 @@ Longer commands can be split over multiple lines
             logResults: true
             command: "echo "first " \
                       && echo \"second\"
+
+### Environment variables
+
+You can add global environment variables to settings, these will be exposed to all jobs.
+
+    version: 1
+    port: 3000
+    environemnt:
+        FOO: bar
+    jobs:
+        myjob:
+            command: echo "${FOO}"
+
 
 ## Logs
 
