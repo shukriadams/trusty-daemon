@@ -45,11 +45,11 @@ You can add global environment variables to settings, these will be exposed to a
 
     version: 1
     port: 3000
-    environemnt:
+    environment:
         FOO: bar
     jobs:
         myjob:
-            command: echo "${FOO}"
+            command: echo "${FOO}" # > bar
 
 
 ## Logs
@@ -58,11 +58,11 @@ Trusty-daemon logs to two locations. Its own logs are written to ./logs in the d
 
 ## How it works
 
-Trusty-daemon uses a dead man's switch mechanism to ensure that it's running. When the daemon process starts, it calculates the expected time the next operation will run. It exposes an HTTP interface which reports a failure if any daemon has not checked in in-time, or if the expected time process itself is not being written.
+Trusty-daemon uses a dead man's switch mechanism to indicate that it's running. When the daemon process starts, it calculates the expected time the next operation will run. It exposes an HTTP interface which reports a failure if any daemon has not checked in in-time, or if the expected time process itself is not being written. It isn't designed to guarantee uptime, only to guarantee to let you know when something is wrong with it.
 
-In addition to this, Trusty-daemon is written to be slaved to simpler but more trusted uptime monitors, such as [Uptimerobot.com](https://uptimerobot.com). Trusty-daemon can return a simple fail flag if any job is currently failing, or a simple fail flag if any job has failed since your last checked in.
+Trusty-daemon should always be slaved to an uptime monitor of some kind, such as [Uptimerobot.com](https://uptimerobot.com). Trusty-daemon can return a simple HTTP error status if any job is currently failing, or has failed since your last checked in. 
 
-Trusty-daemon does not expose error logs, to get details on why a job has failed you'll need to peruse logs the old fashioned way.
+Trusty-daemon does not expose error logs, to get details on why a job has failed you'll need to peruse logs the old fashioned way - on the server they are written.
 
 ## How to use it
 
