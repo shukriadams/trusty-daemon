@@ -1,5 +1,7 @@
 # Trusty-daemon
 
+[![Build Status](https://travis-ci.org/shukriadams/trusty-daemon.svg?branch=master)](https://travis-ci.org/shukriadams/trusty-daemon)
+
 A really simply daemon that executes job at regular intervals, and easily reports if jobs, or the daemon itself, is running reliably.
 
 Trusty-daemon is available in a docker container, so you can deploy and manage it with minimal fuss.
