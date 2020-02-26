@@ -20,6 +20,7 @@ module.exports = {
             // force default structures
             rawSettings = Object.assign({
                 version : 1,
+                port: 3000,
                 logPath : './logs',
                 operationLog : './jobs',
                 timeout: 600000, // timeout of http calls. default is 10 minutes. Set to 0 to disable.
