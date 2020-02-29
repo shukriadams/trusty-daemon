@@ -2,7 +2,6 @@ let winston = require('winston'),
     fs = require('fs-extra'),
     _jobLogs = {},
     _global,
-    process = require('process'),
     path = require('path'),
     settingsProvider = require('./settings');
 
@@ -43,8 +42,10 @@ module.exports = {
     
     // inits the global log, this is used by trusty-daemon for its own errors.
     initializeGlobal : async function(){
-        const settings = await settingsProvider.get();
-        _global = new Logger(settings.logPath);
+        if (!_global){
+            const settings = await settingsProvider.get();
+            _global = new Logger(settings.logPath);
+        }
         return _global;
     },
 

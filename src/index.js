@@ -19,8 +19,7 @@
     }
 
     fs.ensureDirSync(settings.logPath);
-    const logError = (await Logger.initializeGlobal()).error.error,
-        logInfo = (await Logger.initializeGlobal()).info.info;
+    const logError = (await Logger.initializeGlobal()).error.error;
 
     await Logger.initializeJobs();
 

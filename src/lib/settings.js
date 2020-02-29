@@ -15,6 +15,7 @@ module.exports = {
             } catch (e) {
                 console.log('Error reading settings.yml');
                 console.log(e);
+                throw e;
             }
             
             // force default structures
