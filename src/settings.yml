@@ -1,6 +1,8 @@
 # example settings file
 version: 1
 port: 3000
+environment:
+    FOO: bar
 
 # optional command to run when trusty-daemon starts. If your jobs need extra apps installed on the OS and you
 # don't want to roll your own container image, this is a good place to install this apps. For egs, if you're
@@ -10,6 +12,6 @@ onstart: echo "app has started"
 jobs:
     myjob:
         cronmask: "*/10 * * * * *" # cronmask must be wrapped in quotes, as the slashes can break YML
-        command: echo "this works"
+        command: echo "Here's an env variable : ${FOO}"
         logResults: true
         enabled: true

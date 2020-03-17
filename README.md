@@ -72,8 +72,12 @@ If you want reliable push alerts, you can chain a service like uptimerobot.com t
 
 ### Debugging commands
 
-Trusy-daemon runs shell commands - normally, these would be written and tested in advance in your preferred shell. However, if you want to write and debug a command from trusty-daemon, you can do so by setting the jobs's "enabled" property to false, and calling
+Trusy-daemon runs shell commands - normally, these would be written and tested in advance in your preferred shell. However, if you want to write and debug a command from inside trusty-daemon, you can run
 
-    /debug/[your-job-name]
+    node invoke --job JOBNAME 
 
-This runs the job immediately, reads the command directly from settings.yml, and consoles out all output. Debugged jobs will not be written to logs.
+If your job is already active use and you're willing to risk the test run colliding with your actual run you can use
+
+    node invoke --job JOBNAME --force
+
+This reads the command directly from settings.yml, runs the job immediately, and consoles out all output. Debugged jobs will not be written to logs.

@@ -41,7 +41,7 @@ class Logger {
 module.exports = {
     
     // inits the global log, this is used by trusty-daemon for its own errors.
-    initializeGlobal : async function(){
+    global : async function(){
         if (!_global){
             const settings = await settingsProvider.get();
             _global = new Logger(settings.logPath);
