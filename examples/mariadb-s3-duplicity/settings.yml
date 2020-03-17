@@ -22,5 +22,5 @@ jobs:
                   AWS_ACCESS_KEY_ID=mykey \
                   AWS_SECRET_ACCESS_KEY=mysecret \
                   PASSPHRASE=whatever \
-                  duplicity /var/lib/mysql-backups s3://s3.amazonaws.com/mybucket"
+                  duplicity /var/lib/mysql-backups s3://eu-central-1.amazonaws.com/mybucket/myjob"
         logResults: true
