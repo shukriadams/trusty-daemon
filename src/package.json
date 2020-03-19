@@ -6,7 +6,7 @@
     "author": "shukri.adams@gmail.com",
     "license": "MIT",
     "scripts": {
-        "start": "node index",
+        "start": "node index"
     },
     "devDependencies": {},
     "dependencies": {
