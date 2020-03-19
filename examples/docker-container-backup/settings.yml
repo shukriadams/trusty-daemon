@@ -1,0 +1,17 @@
+timeout: 0
+environment:
+    AWS_ACCESS_KEY_ID: mykey
+    AWS_SECRET_ACCESS_KEY: mysecret
+    AWS_BUCKET: mybucket
+    AWS_REGION: eu-central-1
+    
+onstart:
+  apt-get install s3cmd -y
+
+jobs:
+
+    mycontainer:
+        # every night at 1
+        cronmask : 0 1 * * *
+        command : s3cmd sync ./srv/my/container/some/folder s3://$AWS_BUCKET/mycontainer --region $AWS_REGION --delete-removed
+
