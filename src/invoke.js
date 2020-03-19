@@ -25,7 +25,7 @@
         }
         
         if (job.enabled && !argv.force){
-            return console.error(color.red(`job ${jobName} cannot be debugged if it is enabled - set its \"enabled\" flag to false and restart trusty-daemon, or use --force.\n`));
+            return console.error(colors.red(`job ${jobName} cannot be debugged if it is enabled - set its \"enabled\" flag to false and restart trusty-daemon, or use --force.\n`));
         }
     
         command = settings.jobs[jobName].command;
