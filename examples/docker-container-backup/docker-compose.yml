@@ -1,0 +1,16 @@
+version: "2"
+services:
+  backups:
+    image: shukriadams/trusty-daemon-backup:0.0.4
+    container_name: backups
+    restart: unless-stopped
+    ports:
+    - "3000:3000"
+    volumes:
+      - ./settings.yml:/var/app/settings.yml
+      - ./jobs:/var/app/jobs:rw
+      - ./logs:/var/app/logs:rw
+      # passing docker socket in allows trusty-daemon to call shell commands on other containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # exposes volume mounts to backup
+      - /srv/my/container:/srv/my/container
