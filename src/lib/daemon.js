@@ -1,6 +1,6 @@
 let CronJob = require('cron').CronJob,
     Logger = require('./logger'),
-    exec = require('madscience-node-exec'),
+    exec = require('./spawn'),
     path = require('path'),
     jsonfile = require('jsonfile'),
     fs = require('fs-extra'),
@@ -41,6 +41,7 @@ class CronProcess
                 {
                     let result = await exec({ 
                         cmd : `sh`,
+                        ignoreWarnings : this.job.ignoreWarnings,
                         args : ['-c',`${this.job.command}`]
                     });
 

@@ -41,6 +41,10 @@ module.exports = {
 
                     // enabled field is optional, is always one by default
                     enabled : true,
+                    
+                    // stderr output with "warning" in them will be ignored. Experimental and not entirely robust, so
+                    // disabled by default
+                    ignoreWarnings : false,
 
                     // shell command to run
                     command : '',

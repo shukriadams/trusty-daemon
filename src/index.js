@@ -3,7 +3,7 @@
     const http = require('http'),
         fs = require('fs-extra'),
         colors = require('colors/safe'),
-        exec = require('madscience-node-exec'),
+        exec = require('./lib/spawn'),
         path = require('path'),
         process = require('process'),
         Express = require('express'),

@@ -19,9 +19,10 @@
         "express": "4.17.1",
         "jsonfile": "5.0.0",
         "winston": "2.4.0",
+        "custom-env": "1.0.0",
+        "cross-spawn": "6.0.5",        
         "winston-daily-rotate-file": "1.7.2",
         "sanitize-filename": "1.6.3",
-        "madscience-node-exec": "https://github.com/shukriadams/node-exec.git#0.0.2",
         "madscience-fsUtils": "https://github.com/shukriadams/node-fsUtils.git#0.0.4",
         "timebelt": "https://github.com/shukriadams/timebelt.git#0.1.3"
     }
