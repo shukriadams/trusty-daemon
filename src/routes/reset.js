@@ -1,45 +1,46 @@
 module.exports = async function(app){
 
-    const 
-        path = require('path'),
+    const path = require('path'),
         fs = require('fs-extra'),
         ago = require('s-ago').default,
         fsUtils = require('madscience-fsUtils'),
         settingsProvider = require('./../lib/settings'),
         settings = await settingsProvider.get(),
-        logger = await (require('./../lib/logger')).global();
+        logger = await (require('./../lib/logger')).global()
 
     async function resetJob(jobName, job){
         let uncheckedFolder = path.join(settings.operationLog, job.__safeName, 'unchecked'),
-            checkedFolder = path.join(settings.operationLog, job.__safeName, 'checked');
+            checkedFolder = path.join(settings.operationLog, job.__safeName, 'checked')
 
-        await fs.ensureDir(checkedFolder);
+        await fs.ensureDir(checkedFolder)
 
         // force job check against settings object to prevent route injection attack
         if (!await fs.exists(uncheckedFolder)){
             res.statusCode = 400.03;
-            return res.end(`unchecked folder for job ${jobName} not found\n`);
+            return res.end(`unchecked folder for job ${jobName} not found\n`)
         }
         
-        let lastError = new Date('1980/1/1');
-        let now = new Date();
-        let files = fsUtils.readFilesInDirSync(uncheckedFolder);
+        let lastError = new Date('1980/1/1'),
+            now = new Date(),
+            files = fsUtils.readFilesInDirSync(uncheckedFolder)
+
         for (let file of files){
-            let filename = fsUtils.fileNameWithoutExtension(file);
-            let filedate = new Date(parseInt(filename));
+            let filename = fsUtils.fileNameWithoutExtension(file),
+                filedate = new Date(parseInt(filename))
 
             if (filedate.getTime() > now.getTime())
-                continue;
+                continue
             
             if (filedate.getTime() > lastError.getTime())
-                lastError = filedate;
+                lastError = filedate
             
-            const targetPath = path.join(checkedFolder, `${filename}.json`);
-            await fs.move(file, targetPath);
+            const targetPath = path.join(checkedFolder, `${filename}.json`)
+            await fs.move(file, targetPath)
         }
 
         return `${files.length} error(s) reset for job ${jobName} reset. The last error was from ${lastError} (${ago(lastError)}).\n`
     }
+
 
     /**
      * Resets alarm on job that has failed. Job will no longer show as "has failed".
@@ -58,12 +59,16 @@ module.exports = async function(app){
             res.end(result)
 
         } catch(ex) {
-            res.status(500);
-            res.end('Something went wrong - check logs for details.');
-            logger.error.error(ex);
+            res.status(500)
+            res.end('Something went wrong - check logs for details.')
+            logger.error.error(ex)
         }
     })
     
+
+    /**
+     * Resets all jobs, requires "?all" querystring attached
+     */
     app.get('/reset', async function(req, res){
         try {
             
